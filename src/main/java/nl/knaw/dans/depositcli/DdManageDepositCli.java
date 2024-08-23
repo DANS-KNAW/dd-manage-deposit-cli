@@ -18,7 +18,7 @@ package nl.knaw.dans.depositcli;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.lib.util.AbstractCommandLineApp;
-import nl.knaw.dans.lib.util.CliVersionProvider;
+import nl.knaw.dans.lib.util.PicocliVersionProvider;
 import nl.knaw.dans.depositcli.config.DdManageDepositCliConfig;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
@@ -26,7 +26,7 @@ import picocli.CommandLine.Command;
 
 @Command(name = "deposit",
          mixinStandardHelpOptions = true,
-         versionProvider = CliVersionProvider.class,
+         versionProvider = PicocliVersionProvider.class,
          description = "Command-line client for DD Manage Deposit")
 @Slf4j
 public class DdManageDepositCli extends AbstractCommandLineApp<DdManageDepositCliConfig> {

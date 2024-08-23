@@ -23,7 +23,7 @@
     <parent>
         <groupId>nl.knaw.dans</groupId>
         <artifactId>dd-parent</artifactId>
-        <version>1.5.1</version>
+        <version>1.9.0</version>
     </parent>
 
     <artifactId>dd-manage-deposit-cli</artifactId>
@@ -36,7 +36,6 @@
 
     <properties>
         <main-class>nl.knaw.dans.depositcli.DdManageDepositCli</main-class>
-        <picocli.version>4.7.5</picocli.version> <!-- TODO: move to parent -->
         <command-name>deposit</command-name>
     </properties>
 
@@ -49,7 +48,6 @@
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-java-utils</artifactId>
-            <version>0.12.0</version>
         </dependency>
         <dependency>
             <groupId>nl.knaw.dans</groupId>
@@ -79,8 +77,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-        <!-- Only required if this CLI connects to a OpenAPI generated service -->
-        <!--
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -104,9 +100,7 @@
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
-            <version>1.1.1</version>
         </dependency>
-        -->
     </dependencies>
 
     <repositories>
