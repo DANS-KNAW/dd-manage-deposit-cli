@@ -15,77 +15,73 @@
  */
 package nl.knaw.dans.depositcli.command;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nl.knaw.dans.depositcli.client.ApiException;
+import nl.knaw.dans.depositcli.client.ApiResponse;
+import nl.knaw.dans.depositcli.client.DefaultApi;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import javax.ws.rs.core.GenericType;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 
 @Command(name = "create-report",
-    description = "Create report based on dd-manage-deposit database",
-    mixinStandardHelpOptions = true)
+         description = "Create report based on dd-manage-deposit database",
+         mixinStandardHelpOptions = true)
 @Slf4j
 public class CreateReport implements Callable<Integer> {
 
-    private String serviceBaseUrl;
+    private DefaultApi api;
 
-    public CreateReport(String serviceBaseUrl) {
-        this.serviceBaseUrl = serviceBaseUrl;
+    public CreateReport(DefaultApi api) {
+        this.api = api;
     }
 
     public CreateReport() {
     }
 
-    @Option(names = {"-o", "--output-file"}, description = "Output file path or '-' for stdout", defaultValue = "-")
+    @Option(names = { "-o", "--output-file" }, description = "Output file path or '-' for stdout", defaultValue = "-")
     private String outputFile;
 
-    @Option(names = {"-e", "--enddate"}, description = "Filter until the record creation of this date (YYYY-MM-DD)")
+    @Option(names = { "-e", "--enddate" }, description = "Filter until the record creation of this date (YYYY-MM-DD)")
     private String enddate;
 
-    @Option(names = {"-s", "--startdate"}, description = "Filter from the record creation of this date (YYYY-MM-DD)")
+    @Option(names = { "-s", "--startdate" }, description = "Filter from the record creation of this date (YYYY-MM-DD)")
     private String startdate;
 
-    @Option(names = {"-a", "--age"}, description = "Filter records not older than this many days before today")
+    @Option(names = { "-a", "--age" }, description = "Filter records not older than this many days before today")
     private Integer age;
 
-    @Option(names = {"-t", "--state"}, description = "The state of the deposit (repeatable)", split = ",")
+    @Option(names = { "-t", "--state" }, description = "The state of the deposit (repeatable)", split = ",")
     private List<String> state = new ArrayList<>();
 
-    @Option(names = {"-u", "--user"}, description = "The depositor name (repeatable)", split = ",")
+    @Option(names = { "-u", "--user" }, description = "The depositor name (repeatable)", split = ",")
     private List<String> user = new ArrayList<>();
 
-    @Option(names = {"-f", "--format"}, description = "Output data format for Accept header", defaultValue = "text/csv")
+    @Option(names = { "-f", "--format" }, description = "Output data format for Accept header", defaultValue = "text/csv")
     private String fileFormat;
 
-    @Option(names = {"-v", "--server"}, description = "Server label for email subject (prod/demo/..)", defaultValue = "unknown server")
+    @Option(names = { "-v", "--server" }, description = "Server label for email subject (prod/demo/..)", defaultValue = "unknown server")
     private String server;
 
-    @Option(names = {"-r", "--from"}, description = "From address for emailing the report")
+    @Option(names = { "-r", "--from" }, description = "From address for emailing the report")
     private String emailFromAddress;
 
-    @Option(names = {"--email-to"}, description = "Recipient email(s), comma-separated")
+    @Option(names = { "--email-to" }, description = "Recipient email(s), comma-separated")
     private String emailTo;
 
-    @Option(names = {"--cc-email-to"}, description = "CC email(s), comma-separated")
+    @Option(names = { "--cc-email-to" }, description = "CC email(s), comma-separated")
     private String ccEmailTo;
 
-    @Option(names = {"--bcc-email-to"}, description = "BCC email(s), comma-separated")
+    @Option(names = { "--bcc-email-to" }, description = "BCC email(s), comma-separated")
     private String bccEmailTo;
 
     @Override
@@ -97,64 +93,75 @@ public class CreateReport implements Callable<Integer> {
         }
 
         // Compute startdate from age if provided
+        LocalDate start = null;
         if (age != null) {
-            LocalDate computed = LocalDate.now().minusDays(age);
-            startdate = computed.format(DateTimeFormatter.ISO_DATE);
+            start = LocalDate.now().minusDays(age);
+        }
+        else if (startdate != null && !startdate.isBlank()) {
+            start = LocalDate.parse(startdate, DateTimeFormatter.ISO_DATE);
         }
 
-        String url = normalizeBaseUrl(serviceBaseUrl) + "/report";
-        String query = buildQueryParams();
-        URI uri = URI.create(url + (query.isEmpty() ? "" : ("?" + query)));
+        LocalDate end = null;
+        if (enddate != null && !enddate.isBlank()) {
+            end = LocalDate.parse(enddate, DateTimeFormatter.ISO_DATE);
+        }
 
-        log.debug("Requesting report from {}", uri);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(uri)
-            .GET()
-            .header("Accept", fileFormat);
-        HttpRequest request = reqBuilder.build();
+        String userParam = user.isEmpty() ? null : user.get(0);
+        String stateParam = state.isEmpty() ? null : state.get(0);
 
-        HttpResponse<String> response;
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log.debug("Requesting report from {} with user={}, state={}, startdate={}, enddate={}",
+                api.getApiClient().getBasePath(), userParam, stateParam, start, end);
+
+            /*
+             * We are not using the generated method that returns DTOs because we want the output as formatted by
+             * the service (e.g., CSV with header) and the generated method tries to deserialize it into a list of DTOs, which fails.
+             */
+
+            // Define the parameters for the call
+            var queryParams = new ArrayList<nl.knaw.dans.depositcli.client.Pair>();
+            queryParams.addAll(api.getApiClient().parameterToPairs("", "user", user));
+            queryParams.addAll(api.getApiClient().parameterToPairs("", "state", state));
+            queryParams.addAll(api.getApiClient().parameterToPairs("", "startdate", start));
+            queryParams.addAll(api.getApiClient().parameterToPairs("", "enddate", end));
+
+            // Call the API directly, asking for a String response to bypass deserialization issues with CSV
+            ApiResponse<String> response = api.getApiClient().invokeAPI(
+                "DefaultApi.reportGet",    // operation name
+                "/report",                 // path
+                "GET",                     // method
+                queryParams,               // query params
+                null,                      // body
+                new HashMap<>(),           // header params
+                new HashMap<>(),           // cookie params
+                new HashMap<>(),           // form params
+                fileFormat,                // accept (e.g., "text/csv")
+                "application/json",        // content-type must be non-empty/non-null even though we are not actually including a body
+                new String[] {},            // auth names
+                new GenericType<>() {
+
+                }, // Force return type to String
+                true                      // isBodyNullable
+            );
+
+            if (response.getStatusCode() == 200) {
+                String report = response.getData();
+
+                if (report == null) {
+                    report = "";
+                }
+
+                return handleReport(report);
+            }
+            else {
+                System.err.printf("ManageDeposit:create_report() - HTTP %d%n", response.getStatusCode());
+                return 1;
+            }
         }
-        catch (IOException | InterruptedException e) {
+        catch (ApiException e) {
             System.err.println("Error contacting manage-deposit service: " + e.getMessage());
             return 1;
         }
-
-        if (response.statusCode() == 200) {
-            String report = response.body();
-            return handleReport(report);
-        }
-        else {
-            System.err.printf("ManageDeposit:create_report() - HTTP %d%n", response.statusCode());
-            return 1;
-        }
-    }
-
-    private String buildQueryParams() {
-        StringJoiner joiner = new StringJoiner("&");
-        if (!user.isEmpty()) {
-            for (String u : user) {
-                joiner.add("user=" + enc(u));
-            }
-        }
-        if (!state.isEmpty()) {
-            for (String s : state) {
-                joiner.add("state=" + enc(s));
-            }
-        }
-        if (startdate != null && !startdate.isBlank()) {
-            joiner.add("startdate=" + enc(startdate));
-        }
-        if (enddate != null && !enddate.isBlank()) {
-            joiner.add("enddate=" + enc(enddate));
-        }
-        return joiner.toString();
-    }
-
-    private String enc(String v) {
-        return URLEncoder.encode(v, StandardCharsets.UTF_8);
     }
 
     private int handleReport(String report) {
@@ -241,7 +248,8 @@ public class CreateReport implements Callable<Integer> {
 
     private String shellQuote(String s) {
         // Simple single-quote wrapper with escaping of single quotes
-        if (s == null) return "''";
+        if (s == null)
+            return "''";
         return "'" + s.replace("'", "'\\''") + "'";
     }
 

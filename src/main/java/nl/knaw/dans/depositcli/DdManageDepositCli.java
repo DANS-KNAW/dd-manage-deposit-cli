@@ -19,6 +19,8 @@ package nl.knaw.dans.depositcli;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import nl.knaw.dans.depositcli.client.ApiClient;
+import nl.knaw.dans.depositcli.client.DefaultApi;
 import nl.knaw.dans.lib.util.AbstractCommandLineApp;
 import nl.knaw.dans.depositcli.command.CreateReport;
 import nl.knaw.dans.lib.util.PicocliVersionProvider;
@@ -43,6 +45,9 @@ public class DdManageDepositCli extends AbstractCommandLineApp<DdManageDepositCl
     @Override
     public void configureCommandLine(CommandLine commandLine, DdManageDepositCliConfig config) {
         log.debug("Configuring command line");
-        commandLine.addSubcommand(new CreateReport(config.getServiceBaseUrl()));
+        ApiClient apiClient = new ApiClient();
+        apiClient.setBasePath(config.getServiceBaseUrl());
+        DefaultApi api = new DefaultApi(apiClient);
+        commandLine.addSubcommand(new CreateReport(api));
     }
 }

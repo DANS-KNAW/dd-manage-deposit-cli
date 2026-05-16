@@ -37,6 +37,7 @@
     <properties>
         <main-class>nl.knaw.dans.depositcli.DdManageDepositCli</main-class>
         <command-name>deposit</command-name>
+        <dd-manage-deposit-api.version>1.0.1-SNAPSHOT</dd-manage-deposit-api.version>
     </properties>
 
     <scm>
@@ -151,6 +152,52 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.knaw.dans</groupId>
+                                    <artifactId>dd-manage-deposit-api</artifactId>
+                                    <version>${dd-manage-deposit-api.version}</version>
+                                    <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-dd-manage-deposit-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/dd-manage-deposit-api.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <configOptions>
+                                <apiPackage>nl.knaw.dans.depositcli.client</apiPackage>
+                                <modelPackage>nl.knaw.dans.depositcli.api</modelPackage>
+                                <invokerPackage>nl.knaw.dans.depositcli.client</invokerPackage>
+                                <annotationLibrary>none</annotationLibrary>
+                                <library>jersey2</library>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
