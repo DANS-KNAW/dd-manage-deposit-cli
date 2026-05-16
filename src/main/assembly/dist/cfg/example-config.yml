@@ -8,3 +8,5 @@ logging:
       archive: false
       timeZone: system
       currentLogFilename: ${HOME}/dd-manage-deposit-cli.log
+
+serviceBaseUrl: http://localhost:20355

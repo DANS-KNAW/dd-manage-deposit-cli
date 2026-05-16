@@ -18,6 +18,14 @@ package nl.knaw.dans.depositcli.config;
 
 import io.dropwizard.core.Configuration;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import javax.validation.constraints.NotNull;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class DdManageDepositCliConfig extends Configuration {
-  // TODO: add configuration fields
+    @NotNull
+    private String serviceBaseUrl;
 }
