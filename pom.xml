@@ -28,7 +28,7 @@
     <artifactId>dd-manage-deposit-cli</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
-    <name>DD Manage Deposit Cli</name>
+    <name>DD Manage Deposit CLI</name>
     <url>https://github.com/DANS-KNAW/dd-manage-deposit-cli</url>
     <description>Command-line client for DD Manage Deposit</description>
     <inceptionYear>2024</inceptionYear>
