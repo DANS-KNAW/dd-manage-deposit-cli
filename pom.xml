@@ -30,7 +30,7 @@
 
     <name>DD Manage Deposit CLI</name>
     <description>Command-line client for DD Manage Deposit</description>
-    <url>https://github.com/DANS-KNAW/dd-manage-deposit-cli</url>
+    <url>https://dans-knaw.github.io/dd-manage-deposit-cli</url>
     <inceptionYear>2024</inceptionYear>
 
     <scm>
