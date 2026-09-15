@@ -22,27 +22,26 @@
     <parent>
         <groupId>nl.knaw.dans</groupId>
         <artifactId>dd-parent</artifactId>
-        <version>1.12.0</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>dd-manage-deposit-cli</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
     <name>DD Manage Deposit CLI</name>
-    <url>https://github.com/DANS-KNAW/dd-manage-deposit-cli</url>
     <description>Command-line client for DD Manage Deposit</description>
+    <url>https://github.com/DANS-KNAW/dd-manage-deposit-cli</url>
     <inceptionYear>2024</inceptionYear>
-
-    <properties>
-        <main-class>nl.knaw.dans.depositcli.DdManageDepositCli</main-class>
-        <command-name>deposit</command-name>
-        <dd-manage-deposit-api.version>1.0.0</dd-manage-deposit-api.version>
-    </properties>
 
     <scm>
         <developerConnection>scm:git:ssh://github.com/DANS-KNAW/dd-manage-deposit-cli</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
+    <properties>
+        <main-class>nl.knaw.dans.depositcli.DdManageDepositCli</main-class>
+        <command-name>deposit</command-name>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -50,7 +49,7 @@
             <artifactId>dans-java-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>nl.knaw.dans</groupId>
+            <groupId>nl.datastations</groupId>
             <artifactId>dans-validation-lib</artifactId>
         </dependency>
         <dependency>
@@ -103,52 +102,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>dans-releases</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <url>https://maven.dans.knaw.nl/releases/</url>
-        </repository>
-        <repository>
-            <id>dans-snapshots</id>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>https://maven.dans.knaw.nl/snapshots/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>dans-releases</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <url>https://maven.dans.knaw.nl/releases/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>dans-snapshots</id>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>https://maven.dans.knaw.nl/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
         <plugins>
             <plugin>
@@ -156,10 +109,10 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>initialize</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
+                        <phase>initialize</phase>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
