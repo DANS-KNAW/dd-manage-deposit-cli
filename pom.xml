@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>dd-manage-deposit-cli</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <name>DD Manage Deposit CLI</name>
     <description>Command-line client for DD Manage Deposit</description>
@@ -36,7 +36,7 @@
     <scm>
         <connection>scm:git:https://github.com/DANS-KNAW/dd-manage-deposit-cli</connection>
         <developerConnection>scm:git:ssh://github.com/DANS-KNAW/dd-manage-deposit-cli</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.1</tag>
         <url>https://github.com/DANS-KNAW/dd-manage-deposit-cli</url>
     </scm>
 
